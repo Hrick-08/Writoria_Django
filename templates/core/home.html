@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}Writoria - Home{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-content">
+        <div class="welcome-text">
+            <span class="pre-title">Welcome to</span>
+            <h1>Writoria</h1>
+        </div>
+        <p class="hero-subtitle">Share your thoughts with the world</p>
+        {% if user.is_authenticated %}
+            <a href="{% url 'blog_create' %}" class="btn btn-primary cta-button">
+                <i class="fas fa-pen"></i>
+                Start Writing
+            </a>
+        {% else %}
+            <a href="{% url 'auth' %}" class="btn btn-primary cta-button">
+                <i class="fas fa-user"></i>
+                Join Writoria
+            </a>
+        {% endif %}
+    </div>
+</section>
+
+<section class="features-section">
+    <h2 class="section-title">Why Choose Writoria?</h2>
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-edit"></i>
+            </div>
+            <h3>Easy to Use</h3>
+            <p>Intuitive interface designed for writers to focus on content creation</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-globe"></i>
+            </div>
+            <h3>Global Reach</h3>
+            <p>Share your thoughts with readers from around the world</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-heart"></i>
+            </div>
+            <h3>Engage Readers</h3>
+            <p>Build a community around your content with comments and likes</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-robot"></i>
+            </div>
+            <h3>AI-Powered Insights</h3>
+            <p>Get intelligent suggestions to improve your writing</p>
+        </div>
+    </div>
+</section>
+
+<section class="recent-posts">
+    <h2 class="section-title">Recent Posts</h2>
+    <div class="cards">
+        {% for post in posts %}
+            <div class="blog-card">
+                {% if post.image %}
+                    <img src="{{ post.image.url }}" alt="{{ post.title }}" class="card-image">
+                {% endif %}
+                <div class="card-content">
+                    <h3><a href="{% url 'blog_detail' post.slug %}">{{ post.title }}</a></h3>
+                    <p class="post-meta">
+                        <a href="{% url 'user_profile' post.author.username %}" class="author-link">
+                            <i class="fas fa-user"></i> {{ post.author.username }}
+                        </a>
+                        <span class="lives">
+                            <i class="fas fa-heart"></i> {{ post.votes }}
+                        </span>
+                        <br>
+                        <span class="date"><i class="fas fa-calendar"></i> {{ post.created_at|date:"M d, Y" }}</span>
+                    </p>
+                    <p class="post-excerpt">{{ post.content|truncatewords:30 }}</p>
+                    <div class="post-actions">
+                        <a href="{% url 'blog_detail' post.slug %}" class="btn btn-primary">
+                            Read More <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="empty-state">
+                <i class="fas fa-feather-alt"></i>
+                <p>No posts yet. Be the first to write something!</p>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+
+{% endblock %}
