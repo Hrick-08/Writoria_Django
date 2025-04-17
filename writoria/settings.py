@@ -45,7 +45,8 @@ INSTALLED_APPS = [
 JAZZMIN_SETTINGS = {
     "site_title": "Abhi Admin",
     "site_header": "Abhinav's Dashboard",
-    "site_brand": "YourBlog 🔥",
+    "site_brand": "Writoria",
+    "site_logo": "img/Writoria.png",
     "welcome_sign": "Welcome to the Control Panel 👨‍💻",
     "copyright": "Abhinav",
     "search_model": ["yourapp.BlogPost", "yourapp.UserProfile"],
@@ -137,6 +138,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
 # Media files (Uploads)

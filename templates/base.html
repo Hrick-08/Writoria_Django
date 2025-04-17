@@ -77,7 +77,7 @@
         {% block content %}{% endblock %}
     </main>
 
-    <footer>
+    <footer class="footer">
         <div class="footer-content">
             <div class="footer-section">
                 <div class="footer-branding">
@@ -119,32 +119,38 @@
                 </ul>
             </div>
         </div>
-        <div class="footer-bottom">
-            <p>&copy; {% now "Y" %} Writoria. All rights reserved.</p>
-        </div>
+
     </footer>
 
     {% include 'chat/widget.html' %}
     
     <script>
-        // Star animation with increased count and faster animation
+        // Star animation with enhanced visuals and distribution
         function createStars() {
             const starsContainer = document.getElementById('stars');
-            const numberOfStars = 100; // Increased from 50
+            const numberOfStars = 200; // Increased for more density
 
             for (let i = 0; i < numberOfStars; i++) {
                 const star = document.createElement('div');
                 star.className = 'star';
                 
-                // Random position
+                // Improved random distribution using layers
+                const layer = Math.floor(Math.random() * 3); // Creates 3 depth layers
+                const scale = 0.5 + (layer * 0.5); // Larger stars appear closer
+                
                 star.style.left = `${Math.random() * 100}%`;
                 star.style.top = `${Math.random() * 100}%`;
+                star.style.transform = `scale(${scale})`;
                 
-                // Faster animation duration (2-4s instead of 2-6s)
-                star.style.setProperty('--duration', `${2 + Math.random() * 2}s`);
+                // Varied animation duration based on layer
+                const baseDuration = 2 + (layer * 1.5);
+                star.style.setProperty('--duration', `${baseDuration + Math.random() * 2}s`);
                 
-                // Random animation delay
-                star.style.animationDelay = `${Math.random() * 2}s`;
+                // Random animation delay for more natural effect
+                star.style.animationDelay = `${Math.random() * 3}s`;
+                
+                // Varied opacity based on layer
+                star.style.setProperty('--max-opacity', `${0.5 + (layer * 0.2)}`);
                 
                 starsContainer.appendChild(star);
             }
@@ -152,6 +158,13 @@
 
         // Initialize stars
         createStars();
+        
+        // Recreate stars on theme change for proper color adaptation
+        document.addEventListener('themeChanged', () => {
+            const starsContainer = document.getElementById('stars');
+            starsContainer.innerHTML = '';
+            createStars();
+        });
     </script>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

@@ -291,43 +291,51 @@ a:hover {
 
 .star {
     position: absolute;
-    width: 2px;
-    height: 2px;
+    width: 3px;
+    height: 3px;
     background: var(--accent-color);
     border-radius: 50%;
     opacity: 0;
+    box-shadow: 0 0 10px var(--accent-color), 0 0 20px var(--accent-color);
     animation: twinkle var(--duration) infinite;
     will-change: transform, opacity;
 }
 
 .star:nth-child(3n) {
-    width: 3px;
-    height: 3px;
+    width: 4px;
+    height: 4px;
+    background: var(--gradient-start);
+    box-shadow: 0 0 15px var(--gradient-start), 0 0 30px var(--gradient-start);
     animation: twinkle var(--duration) infinite, float 5s ease-in-out infinite;
     animation-delay: 0.3s;
 }
 
 .star:nth-child(5n) {
-    width: 4px;
-    height: 4px;
+    width: 5px;
+    height: 5px;
+    background: var(--gradient-end);
+    box-shadow: 0 0 20px var(--gradient-end), 0 0 40px var(--gradient-end);
     animation: twinkle 3s infinite, float 7s ease-in-out infinite reverse;
     animation-delay: 0.5s;
 }
 
 .star:nth-child(7n) {
-    background: var(--gradient-end);
-    animation: twinkle 2.5s infinite, float 6s ease-in-out infinite;
+    width: 6px;
+    height: 6px;
+    background: linear-gradient(45deg, var(--gradient-start), var(--gradient-end));
+    box-shadow: 0 0 25px var(--accent-color), 0 0 50px var(--accent-color);
+    animation: twinkle 2.5s infinite, float 6s ease-in-out infinite, rotate 10s linear infinite;
     animation-delay: 0.7s;
 }
 
 @keyframes twinkle {
     0%, 100% {
-        transform: scale(0);
+        transform: scale(0.5);
         opacity: 0;
     }
     50% {
-        transform: scale(1);
-        opacity: 0.3;
+        transform: scale(1.2);
+        opacity: 0.7;
     }
 }
 
@@ -336,7 +344,16 @@ a:hover {
         transform: translateY(0) translateX(0);
     }
     50% {
-        transform: translateY(-10px) translateX(5px);
+        transform: translateY(-20px) translateX(10px);
+    }
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
     }
 }
 
