@@ -1,17 +1,29 @@
 .about-page {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: 0; /* Remove top/bottom padding */
+    position: relative; /* Add position relative */
 }
 
 .hero-section {
     text-align: center;
     padding: 4rem 2rem;
     background: linear-gradient(135deg, var(--primary-color-dark) 0%, var(--primary-color) 100%);
-    border-radius: 1rem;
+    border-radius: 0 0 1rem 1rem; /* Remove top border radius */
     margin-bottom: 4rem;
-    animation: fadeInUp 0.8s ease-out;
-    color: white;
+    width: 100%;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 100vw;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.hero-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
 }
 
 .hero-section h1 {
@@ -55,44 +67,6 @@
     color: var(--text-color-secondary);
 }
 
-.features-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
-    margin-bottom: 4rem;
-}
-
-.feature-card {
-    padding: 2rem;
-    text-align: center;
-    background: var(--background-light);
-    border-radius: 1rem;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.feature-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-}
-
-.feature-card i {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-    color: var(--primary-color);
-}
-
-.feature-card h3 {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-    color: var(--text-color);
-}
-
-.feature-card p {
-    color: var(--text-color-secondary);
-    line-height: 1.5;
-}
-
 .team-section {
     text-align: center;
     margin-bottom: 4rem;
@@ -113,12 +87,12 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 2rem;
-    margin: 3rem 0;
+    margin: 2rem 0; /* Reduced from 3rem to 2rem */
 }
 
 .value-card {
     position: relative;
-    padding: 2rem;
+    padding: 1.5rem; /* Reduced from 2rem */
     background: var(--background-light);
     border-radius: 1.5rem;
     overflow: hidden;
@@ -126,7 +100,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1.5rem;
+    gap: 1rem; /* Reduced from 1.5rem */
     border: 1px solid rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
 }
@@ -145,7 +119,7 @@
     justify-content: center;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem; /* Reduced from 1rem */
     transition: all 0.4s ease;
 }
 
@@ -164,7 +138,7 @@
 
 .value-content h3 {
     font-size: 1.8rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem; /* Reduced from 1rem */
     background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
     -webkit-background-clip: text;
     background-clip: text;
@@ -186,7 +160,7 @@
 }
 
 .value-points li {
-    margin: 0.8rem 0;
+    margin: 0.5rem 0; /* Reduced from 0.8rem */
     display: flex;
     align-items: center;
     gap: 0.8rem;
@@ -230,11 +204,11 @@
 
 .join-section {
     text-align: center;
-    padding: 4rem 2rem;
+    padding: 3rem 2rem; /* Reduced from 4rem to 3rem */
     background: linear-gradient(135deg, var(--primary-color-dark) 0%, var(--primary-color) 100%);
     border-radius: 1rem;
     color: #fff;
-    margin-top: 4rem;
+    margin-top: 2rem; /* Reduced from 4rem to 2rem */
 }
 
 .join-section h2 {
@@ -296,7 +270,6 @@
         font-size: 1.2rem;
     }
 
-    .features-grid,
     .values-grid {
         grid-template-columns: 1fr;
     }
