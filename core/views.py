@@ -313,4 +313,10 @@ def help_center(request):
     return render(request, 'core/help_center.html')
 
 def team(request):
-    return render(request, 'core/team.html')
+    context = {
+        'divyam_image': 'img/1.jpg',
+        'abhinav_image': 'img/2.jpg',
+        'hrick_image': 'img/3.jpg',
+        'harsh_image': 'img/4.jpg',
+    }
+    return render(request, 'core/team.html', context)

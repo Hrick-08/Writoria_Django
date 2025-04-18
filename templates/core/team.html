@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Our Team - Writoria{% endblock %}
 
@@ -14,9 +15,7 @@
     <section class="team-grid">
         <div class="team-member">
             <div class="member-image">
-                <div class="image-placeholder">
-                    <i class="fas fa-user"></i>
-                </div>
+                <img src="{% static divyam_image %}" alt="Divyam" class="member-photo">
             </div>
             <div class="member-info">
                 <h2>Divyam</h2>
@@ -31,9 +30,7 @@
 
         <div class="team-member">
             <div class="member-image">
-                <div class="image-placeholder">
-                    <i class="fas fa-user"></i>
-                </div>
+                <img src="{% static abhinav_image %}" alt="Abhinav" class="member-photo">
             </div>
             <div class="member-info">
                 <h2>Abhinav</h2>
@@ -48,9 +45,7 @@
 
         <div class="team-member">
             <div class="member-image">
-                <div class="image-placeholder">
-                    <i class="fas fa-user"></i>
-                </div>
+                <img src="{% static hrick_image %}" alt="Hrick" class="member-photo">
             </div>
             <div class="member-info">
                 <h2>Hrick</h2>
@@ -65,9 +60,7 @@
 
         <div class="team-member">
             <div class="member-image">
-                <div class="image-placeholder">
-                    <i class="fas fa-user"></i>
-                </div>
+                <img src="{% static harsh_image %}" alt="Harsh" class="member-photo">
             </div>
             <div class="member-info">
                 <h2>Harsh</h2>
