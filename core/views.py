@@ -12,8 +12,31 @@ from django.contrib.auth.models import User
 from .forms import BlogPostForm, UserProfileForm, CustomUserCreationForm, CommentForm
 import random
 import json
+from .services import APIClient
 
 def home(request):
+   # Get posts from Django DB
+    django_posts = BlogPost.objects.all().order_by('-created_at')[:6]
+    
+    # Get posts from Flask API
+    api_response, status_code = APIClient.get_blogs(
+        request.api_token if request.user.is_authenticated else None
+    )
+    
+    if status_code == 200:
+        # Sync any missing posts from API to Django
+        api_posts = api_response
+        for api_post in api_posts:
+            if not BlogPost.objects.filter(id=api_post['id']).exists():
+                BlogPost.objects.create(
+                    id=api_post['id'],
+                    title=api_post['title'],
+                    content=api_post['content'],
+                    author=request.user if request.user.is_authenticated else None,
+                    created_at=api_post['timestamp']
+                )
+    
+    # Refresh the queryset after potential new additions
     posts = BlogPost.objects.all().order_by('-created_at')[:6]
     return render(request, 'core/home.html', {'posts': posts})
 
@@ -32,20 +55,51 @@ def auth_view(request):
             if login_form.is_valid():
                 username = login_form.cleaned_data.get('username')
                 password = login_form.cleaned_data.get('password')
+                
+                # First authenticate with Django
                 user = authenticate(request, username=username, password=password)
                 if user is not None:
                     login(request, user)
-                    messages.success(request, 'Successfully logged in!')
-                    return redirect('home')
+                    
+                    # Then authenticate with Flask API
+                    api_response, status_code = APIClient.login_user(username, password)
+                    if status_code == 200:
+                        # Store API token in session
+                        request.session['api_token'] = api_response.get('access_token')
+                        messages.success(request, 'Successfully logged in!')
+                        return redirect('home')
+                    else:
+                        messages.warning(request, 'Logged in to Django but API login failed')
+                        return redirect('home')
                 else:
                     messages.error(request, 'Invalid username or password.')
+                    
         elif action == 'register':
             register_form = CustomUserCreationForm(request.POST)
             if register_form.is_valid():
-                user = register_form.save()
-                login(request, user)
-                messages.success(request, 'Account created successfully! Welcome to Writoria.')
-                return redirect('home')
+                # First register with Flask API
+                api_response, status_code = APIClient.register_user(
+                    register_form.cleaned_data['username'],
+                    register_form.cleaned_data['password1']
+                )
+                
+                if status_code == 201:
+                    # If API registration successful, create Django user
+                    user = register_form.save()
+                    login(request, user)
+                    
+                    # Now login to get API token
+                    api_login_response, login_status = APIClient.login_user(
+                        register_form.cleaned_data['username'],
+                        register_form.cleaned_data['password1']
+                    )
+                    
+                    if login_status == 200:
+                        request.session['api_token'] = api_login_response.get('access_token')
+                        messages.success(request, 'Account created successfully! Welcome to Writoria.')
+                        return redirect('home')
+                else:
+                    messages.error(request, f'API Registration failed: {api_response.get("message")}')
     
     return render(request, 'core/auth.html', {
         'login_form': login_form,
@@ -65,6 +119,26 @@ class BlogListView(ListView):
         # Get search query and category filter
         search_query = self.request.GET.get('search', '')
         category = self.request.GET.get('category', '')
+        
+        # Get posts from Flask API
+        api_response, status_code = APIClient.get_blogs(self.request.api_token if self.request.user.is_authenticated else None)
+        if status_code == 200:
+            # Sync any missing posts from API to Django
+            api_posts = api_response
+            for api_post in api_posts:
+                if not BlogPost.objects.filter(id=api_post['id']).exists():
+                    # Get or create the author user
+                    author, _ = User.objects.get_or_create(
+                        username=api_post['author'],
+                        defaults={'password': 'unusable'}
+                    )
+                    BlogPost.objects.create(
+                        id=api_post['id'],
+                        title=api_post['title'],
+                        content=api_post['content'],
+                        author=author,
+                        created_at=api_post['timestamp']
+                    )
         
         # Apply search filter
         if search_query:
@@ -92,6 +166,22 @@ class BlogDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        
+        # Get comments from Flask API
+        api_response, status_code = APIClient.get_blog_comments(self.object.id)
+        if status_code == 200:
+            # Sync comments from API to Django if they don't exist
+            api_comments = api_response
+            for api_comment in api_comments:
+                if not Comment.objects.filter(id=api_comment['id']).exists():
+                    Comment.objects.create(
+                        id=api_comment['id'],
+                        post=self.object,
+                        author=User.objects.get(username=api_comment['username']),
+                        content=api_comment['content'],
+                        created_at=api_comment['timestamp']
+                    )
+        
         if self.request.user.is_authenticated:
             context['is_bookmarked'] = Bookmark.objects.filter(
                 user=self.request.user,
@@ -127,7 +217,7 @@ class BlogCreateView(LoginRequiredMixin, CreateView):
                 caption=caption,
                 order=i
             )
-        
+        messages.success(self.request, 'Blog post created successfully!')
         return response
 
 class BlogUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -136,26 +226,28 @@ class BlogUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     template_name = 'core/blog_form.html'
 
     def form_valid(self, form):
+        form.instance.author = self.request.user
         response = super().form_valid(form)
         
-        # Handle additional images
+        # Handle image updates
         images = self.request.FILES.getlist('images')
         captions = form.cleaned_data.get('image_captions', '').split('\n')
         captions = [cap.strip() for cap in captions if cap.strip()]
         
-        # Remove existing images if new ones are uploaded
-        if images:
-            self.object.images.all().delete()
-            
-            for i, image in enumerate(images):
-                caption = captions[i] if i < len(captions) else ''
-                BlogImage.objects.create(
-                    post=self.object,
-                    image=image,
-                    caption=caption,
-                    order=i
-                )
+        # Delete existing images if replace_images is checked
+        if form.cleaned_data.get('replace_images'):
+            BlogImage.objects.filter(post=self.object).delete()
         
+        # Add new images
+        for i, image in enumerate(images):
+            caption = captions[i] if i < len(captions) else ''
+            BlogImage.objects.create(
+                post=self.object,
+                image=image,
+                caption=caption,
+                order=i + self.object.blogimage_set.count()
+            )
+        messages.success(self.request, 'Blog post updated successfully!')
         return response
 
     def test_func(self):
@@ -166,6 +258,25 @@ class BlogDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = BlogPost
     template_name = 'core/blog_confirm_delete.html'
     success_url = '/'
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        success_url = self.get_success_url()
+
+        # Delete from API first
+        api_response, status_code = APIClient.delete_blog(
+            self.object.id,
+            request.api_token if hasattr(request, 'api_token') else None
+        )
+
+        if status_code not in [200, 204]:
+            messages.error(request, 'Failed to delete post from remote server. Please try again.')
+            return redirect('blog_detail', slug=self.object.slug)
+
+        # If API deletion successful, delete from local database
+        self.object.delete()
+        messages.success(request, 'Blog post deleted successfully!')
+        return redirect(success_url)
 
     def test_func(self):
         post = self.get_object()
@@ -213,23 +324,34 @@ def vote_post(request, slug):
 def add_comment(request, slug):
     post = get_object_or_404(BlogPost, slug=slug)
     if request.method == 'POST':
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            comment = form.save(commit=False)
-            comment.post = post
-            comment.author = request.user
-            parent_id = request.POST.get('parent_id')
-            if parent_id:
-                comment.parent = Comment.objects.get(id=parent_id)
-            comment.save()
-            return JsonResponse({
-                'status': 'success',
-                'comment_id': comment.id,
-                'author': comment.author.username,
-                'content': comment.content,
-                'created_at': comment.created_at.strftime('%b %d, %Y %H:%M'),
-                'parent_id': parent_id
-            })
+        try:
+            data = json.loads(request.body)
+            form = CommentForm({'content': data.get('content')})
+            if form.is_valid():
+                comment = form.save(commit=False)
+                comment.post = post
+                comment.author = request.user
+                parent_id = data.get('parent_id')
+                if parent_id:
+                    parent_comment = Comment.objects.get(id=parent_id)
+                    comment.parent = parent_comment
+                
+                comment.save()
+                return JsonResponse({
+                    'status': 'success',
+                    'comment_id': comment.id,
+                    'author': request.user.username,
+                    'content': comment.content,
+                    'created_at': comment.created_at.strftime('%b %d, %Y %H:%M'),
+                    'parent_id': parent_id
+                })
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+        except Comment.DoesNotExist:
+            return JsonResponse({'error': 'Parent comment not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+                
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
 @login_required
@@ -243,14 +365,35 @@ def delete_comment(request, comment_id):
 @login_required
 def profile(request):
     profile, created = UserProfile.objects.get_or_create(user=request.user)
+    
     if request.method == 'POST':
         form = UserProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Profile updated successfully!')
+            # Update Django profile
+            profile = form.save()
+            
+            # Sync with Flask API
+            api_response, status_code = APIClient.update_user_profile(
+                request.api_token,
+                bio=profile.bio,
+                profile_pic=profile.avatar.url if profile.avatar else None
+            )
+            
+            if status_code == 200:
+                messages.success(request, 'Profile updated successfully!')
+            else:
+                messages.warning(request, 'Profile updated in Django but API sync failed')
             return redirect('profile')
     else:
         form = UserProfileForm(instance=profile)
+        
+        # Get API profile data
+        api_response, status_code = APIClient.get_user_profile(request.api_token)
+        if status_code == 200:
+            # Update local profile with API data if needed
+            if api_response.get('bio') and not profile.bio:
+                profile.bio = api_response['bio']
+                profile.save()
     
     user_posts = BlogPost.objects.filter(author=request.user).order_by('-created_at')
     bookmarks = Bookmark.objects.filter(user=request.user).order_by('-created_at')

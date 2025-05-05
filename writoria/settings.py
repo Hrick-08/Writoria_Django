@@ -42,6 +42,11 @@ INSTALLED_APPS = [
     "chat",
 ]
 
+# Session configuration
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds
+SESSION_COOKIE_NAME = 'writoria_sessionid'
+
 JAZZMIN_SETTINGS = {
     "site_title": "Abhi Admin",
     "site_header": "Abhinav's Dashboard",
@@ -69,6 +74,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "core.middleware.APITokenMiddleware",  # Add this line
 ]
 
 ROOT_URLCONF = "writoria.urls"
