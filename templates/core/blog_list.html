@@ -44,7 +44,9 @@
                         <br>
                         <span class="date"><i class="fas fa-calendar"></i> {{ post.created_at|date:"M d, Y" }}</span>
                     </p>
-                    <p class="post-excerpt">{{ post.content|truncatewords:30 }}</p>
+                    <div class="post-excerpt">
+                        {{ post.content|safe|striptags|truncatechars:200 }}
+                    </div>
                     <div class="post-actions">
                         <a href="{% url 'blog_detail' post.slug %}" class="btn btn-primary">Read More</a>
                     </div>

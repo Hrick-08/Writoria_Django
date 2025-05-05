@@ -10,28 +10,56 @@ class APIClient:
         return APIClient._make_request('GET', '/blogs', headers=headers)
 
     @staticmethod
+    def get_blog(blog_id, token=None):
+        """Get a specific blog post from the Flask API."""
+        headers = APIClient._get_headers(token)
+        return APIClient._make_request('GET', f'/blogs/{blog_id}', headers=headers)
+
+    @staticmethod
+    def create_blog(token, title, content):
+        """Create a new blog post in the Flask API."""
+        if not token:
+            return {'message': 'Authentication required'}, 401
+        
+        headers = APIClient._get_headers(token)
+        headers['Content-Type'] = 'application/json'
+        
+        data = {
+            'title': title,
+            'content': content
+        }
+        return APIClient._make_request('POST', '/blogs', headers=headers, json=data)
+
+    @staticmethod
     def get_blog_comments(blog_id, token=None):
         headers = APIClient._get_headers(token)
         return APIClient._make_request('GET', f'/blogs/{blog_id}/comments', headers=headers)
 
     @staticmethod
     def register_user(username, password):
+        headers = {'Content-Type': 'application/json'}
         data = {'username': username, 'password': password}
-        return APIClient._make_request('POST', '/register', json=data)
+        return APIClient._make_request('POST', '/register', headers=headers, json=data)
 
     @staticmethod
     def login_user(username, password):
+        headers = {'Content-Type': 'application/json'}
         data = {'username': username, 'password': password}
-        return APIClient._make_request('POST', '/login', json=data)
+        return APIClient._make_request('POST', '/login', headers=headers, json=data)
 
     @staticmethod
     def get_user_profile(token):
+        if not token:
+            return {'message': 'Authentication required'}, 401
         headers = APIClient._get_headers(token)
         return APIClient._make_request('GET', '/profile', headers=headers)
 
     @staticmethod
     def update_user_profile(token, **profile_data):
+        if not token:
+            return {'message': 'Authentication required'}, 401
         headers = APIClient._get_headers(token)
+        headers['Content-Type'] = 'application/json'
         return APIClient._make_request('PUT', '/profile', headers=headers, json=profile_data)
 
     @staticmethod

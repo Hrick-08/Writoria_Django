@@ -282,6 +282,33 @@
     background: linear-gradient(45deg, var(--gradient-start), var(--gradient-end));
 }
 
+/* Custom Input */
+.custom-input {
+    width: 100%;
+    padding: 1rem;
+    background: rgba(16, 16, 16, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: #e2e8f0;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.custom-input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    background: rgba(16, 16, 16, 0.8);
+    box-shadow: 
+        0 0 5px rgba(139, 92, 246, 0.3),
+        0 0 20px rgba(139, 92, 246, 0.15);
+}
+
+.custom-input::placeholder {
+    color: #94a3b8;
+    opacity: 0.7;
+}
+
 /* Profile Sections */
 .profile-section {
     margin-bottom: 3rem;

@@ -47,7 +47,7 @@
     {% endif %}
 
     <div class="blog-content">
-        {{ object.content|linebreaks }}
+        {{ object.content|safe|linebreaksbr }}
 
         {% for image in object.images.all %}
             <div class="post-image content-image">

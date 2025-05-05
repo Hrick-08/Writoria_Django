@@ -44,11 +44,11 @@
             <div class="form-group">
                 <label for="{{ form.image.id_for_label }}" class="form-label">Featured Image</label>
                 <div class="dropzone single-image-dropzone" id="featured-image-dropzone">
+                    <input type="file" name="image" id="{{ form.image.id_for_label }}" accept="image/*" class="hidden-input">
                     <div class="upload-prompt">
                         <i class="fas fa-cloud-upload-alt clickable"></i>
                         <p class="clickable">🖼️ Drop your featured image here or click to upload</p>
                     </div>
-                    {{ form.image }}
                 </div>
                 <div class="image-preview-container" id="featured-image-preview"></div>
                 {% if form.image.errors %}
@@ -59,11 +59,11 @@
             <div class="form-group">
                 <label class="form-label">Additional Images</label>
                 <div class="dropzone" id="image-dropzone">
+                    <input type="file" name="images" accept="image/*" multiple class="hidden-input">
                     <div class="upload-prompt">
                         <i class="fas fa-cloud-upload-alt clickable"></i>
                         <p class="clickable">🖼️ Drop your images here or click to upload</p>
                     </div>
-                    {{ form.images }}
                 </div>
                 <div class="image-preview-container" id="image-preview"></div>
                 {% if form.images.errors %}
@@ -196,10 +196,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 preview.innerHTML = `
                     <img src="${e.target.result}" alt="Featured Image Preview">
                     <span class="preview-label">Featured</span>
+                    <button type="button" class="remove-image" onclick="removeFeaturedImage(this)">
+                        <i class="fas fa-times"></i>
+                    </button>
                 `;
                 featuredPreviewContainer.appendChild(preview);
             }
             reader.readAsDataURL(file);
+        }
+
+        window.removeFeaturedImage = function(button) {
+            button.closest('.preview-item').remove();
+            featuredImageInput.value = '';
         }
     }
 
@@ -241,27 +249,63 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         function handleFiles(files) {
-            previewContainer.innerHTML = '';
             const validFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+            const existingFiles = Array.from(imageInput.files || []);
+            const allFiles = [...existingFiles, ...validFiles];
             
-            validFiles.forEach((file, index) => {
+            previewContainer.innerHTML = '';
+            
+            allFiles.forEach((file, index) => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const preview = document.createElement('div');
                     preview.className = 'preview-item';
+                    preview.dataset.index = index;
                     preview.innerHTML = `
                         <img src="${e.target.result}" alt="Preview ${index + 1}">
                         <span class="preview-number">${index + 1}</span>
+                        <button type="button" class="remove-image" onclick="removeAdditionalImage(${index})">
+                            <i class="fas fa-times"></i>
+                        </button>
                     `;
                     previewContainer.appendChild(preview);
+                    updateImageCaptions();
                 }
                 reader.readAsDataURL(file);
             });
 
             // Update the file input
             const dataTransfer = new DataTransfer();
-            validFiles.forEach(file => dataTransfer.items.add(file));
+            allFiles.forEach(file => dataTransfer.items.add(file));
             imageInput.files = dataTransfer.files;
+        }
+
+        window.removeAdditionalImage = function(index) {
+            const files = Array.from(imageInput.files);
+            files.splice(index, 1);
+            
+            const dataTransfer = new DataTransfer();
+            files.forEach(file => dataTransfer.items.add(file));
+            imageInput.files = dataTransfer.files;
+            
+            // Re-render previews
+            previewContainer.innerHTML = '';
+            handleFiles(files);
+            updateImageCaptions();
+        }
+
+        function updateImageCaptions() {
+            const captionsArea = document.querySelector('textarea[name="image_captions"]');
+            if (captionsArea) {
+                const captions = captionsArea.value.split('\n');
+                while (captions.length > imageInput.files.length) {
+                    captions.pop();
+                }
+                while (captions.length < imageInput.files.length) {
+                    captions.push('');
+                }
+                captionsArea.value = captions.join('\n');
+            }
         }
     }
 

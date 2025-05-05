@@ -89,7 +89,8 @@ class UserProfileForm(forms.ModelForm):
             }),
             'website': forms.URLInput(attrs={
                 'placeholder': 'https://',
-                'class': 'form-input'
+                'class': 'custom-textarea',
+                'style': 'min-height: 45px;'
             })
         }
 

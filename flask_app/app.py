@@ -165,16 +165,82 @@ def profile():
         return jsonify({'message': 'Profile updated successfully'}), 200
 
 # Blog Routes
-@app.route('/api/blogs', methods=['GET'])  # Removed POST method since creation is handled by Django
+@app.route('/api/blogs', methods=['GET', 'POST'])
 @jwt_required(optional=True)  # Allow GET without token
 def blogs():
+    if request.method == 'POST':
+        # Ensure user is authenticated for POST
+        user_id = get_jwt_identity()
+        if not user_id:
+            return jsonify({'message': 'Authentication required'}), 401
+            
+        # Check if request has JSON content
+        if not request.is_json:
+            return jsonify({'message': 'Content-Type must be application/json'}), 415
+            
+        data = request.get_json()
+        if not data or not data.get('title') or not data.get('content'):
+            return jsonify({'message': 'Title and content are required'}), 400
+            
+        try:
+            # Get the user from Flask DB
+            user = User.query.get(int(user_id))
+            
+            # If user doesn't exist in Flask but exists in Django, create in Flask
+            if not user:
+                try:
+                    django_user = DjangoUser.objects.get(id=int(user_id))
+                    user = User(
+                        id=django_user.id,
+                        username=django_user.username,
+                        password='unusable'  # Since auth is handled by Django
+                    )
+                    db.session.add(user)
+                    try:
+                        db.session.commit()
+                    except Exception as e:
+                        db.session.rollback()
+                        return jsonify({'message': f'Failed to create user in Flask: {str(e)}'}), 500
+                except DjangoUser.DoesNotExist:
+                    return jsonify({'message': 'User not found in Django database'}), 404
+            
+            # Create the blog post
+            blog = Blog(
+                title=data['title'],
+                content=data['content'],
+                author_id=user.id,
+                author=user
+            )
+            db.session.add(blog)
+            
+            try:
+                db.session.commit()
+                return jsonify({
+                    'status': 'success',
+                    'message': 'Blog created successfully',
+                    'blog': {
+                        'id': blog.id,
+                        'title': blog.title,
+                        'content': blog.content,
+                        'timestamp': blog.timestamp.isoformat(),
+                        'author': user.username
+                    }
+                }), 201
+            except Exception as e:
+                db.session.rollback()
+                return jsonify({'message': f'Failed to create blog: {str(e)}'}), 500
+                
+        except Exception as e:
+            return jsonify({'message': f'Server error: {str(e)}'}), 500
+    
+    # GET method
     blogs = Blog.query.all()
     return jsonify([{
         'id': b.id,
         'title': b.title,
         'content': b.content,
         'timestamp': b.timestamp.isoformat(),
-        'author': b.author.username
+        'author': b.author.username if b.author else None
     } for b in blogs])
 
 @app.route('/api/blogs/<int:id>', methods=['GET', 'DELETE'])
@@ -186,20 +252,44 @@ def get_blog(id):
         # Get the current user's ID from the JWT token
         current_user_id = get_jwt_identity()
         
-        # Check if user owns the blog
-        if blog.author_id != int(current_user_id):
-            return jsonify({'message': 'Unauthorized - you do not own this blog post'}), 403
-            
         try:
-            # First delete all comments associated with this blog
-            Comment.query.filter_by(blog_id=id).delete()
-            # Then delete the blog
-            db.session.delete(blog)
-            db.session.commit()
-            return jsonify({'message': 'Blog deleted successfully'}), 200
+            # Get the user from Flask DB
+            user = User.query.get(int(current_user_id))
+            if not user:
+                # If user doesn't exist in Flask but exists in Django, create in Flask
+                try:
+                    django_user = DjangoUser.objects.get(id=int(current_user_id))
+                    user = User(
+                        id=django_user.id,
+                        username=django_user.username,
+                        password='unusable'  # Since auth is handled by Django
+                    )
+                    db.session.add(user)
+                    try:
+                        db.session.commit()
+                    except Exception as e:
+                        db.session.rollback()
+                        return jsonify({'message': f'Failed to create user in Flask: {str(e)}'}), 500
+                except DjangoUser.DoesNotExist:
+                    return jsonify({'message': 'User not found in Django database'}), 404
+            
+            # Check if user owns the blog
+            if blog.author_id != user.id:
+                return jsonify({'message': 'Unauthorized - you do not own this blog post'}), 403
+                
+            try:
+                # First delete all comments associated with this blog
+                Comment.query.filter_by(blog_id=id).delete()
+                # Then delete the blog
+                db.session.delete(blog)
+                db.session.commit()
+                return jsonify({'message': 'Blog deleted successfully'}), 200
+            except Exception as e:
+                db.session.rollback()
+                return jsonify({'message': f'Failed to delete blog: {str(e)}'}), 500
+                
         except Exception as e:
-            db.session.rollback()
-            return jsonify({'message': f'Failed to delete blog: {str(e)}'}), 500
+            return jsonify({'message': f'Server error: {str(e)}'}), 500
     
     # GET method
     return jsonify({
