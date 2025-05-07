@@ -8,8 +8,8 @@ import django
 import os
 import sys
 
-# Setup Django environment
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # Go up one level to find writoria
+django_project_path = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'Django'))
+sys.path.append(django_project_path)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'writoria.settings')
 django.setup()
 
@@ -26,7 +26,7 @@ app.config['JWT_HEADER_NAME'] = 'Authorization'
 app.config['JWT_HEADER_TYPE'] = 'Bearer'
 db = SQLAlchemy(app)
 jwt = JWTManager(app)
-CORS(app, resources={r"/api/*": {"origins": ["http://localhost:8000", "http://127.0.0.1:8000", "*"]}})  # Allow Postman and Django frontend
+CORS(app, resources={r"/api/*": {"origins": ["http://localhost:8000", "http://127.0.0.1:8000", "*"]}})  
 
 # Database Models
 class User(db.Model):
