@@ -125,11 +125,18 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         
         const formData = new FormData(form);
+        const data = {
+            name: formData.get('name'),
+            email: formData.get('email'),
+            subject: formData.get('subject') || 'No Subject',
+            message: formData.get('message')
+        };
         
         fetch('', {
             method: 'POST',
-            body: formData,
+            body: JSON.stringify(data),
             headers: {
+                'Content-Type': 'application/json',
                 'X-CSRFToken': formData.get('csrfmiddlewaretoken')
             }
         })

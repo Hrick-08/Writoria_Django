@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0009_contactmessage'),
+        ('core', '0008_remove_userprofile_gender'),
     ]
 
     operations = [

@@ -9,10 +9,10 @@ from django.contrib.auth import login, authenticate
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 import requests
-from .models import BlogPost, UserProfile, Bookmark, BlogImage, Vote, Comment, ContactMessage
+import json
+from .models import BlogPost, UserProfile, Bookmark, BlogImage, Vote, Comment
 from django.contrib.auth.models import User
 from .forms import BlogPostForm, UserProfileForm, CustomUserCreationForm, CommentForm
-import json
 from .services.api import APIClient
 
 def home(request):
@@ -320,84 +320,52 @@ def user_profile(request, username):
 
 def help_center(request):
     if request.method == 'POST':
-        name = request.POST.get('name')
-        email = request.POST.get('email')
-        subject = request.POST.get('subject', 'No Subject')
-        message = request.POST.get('message')
-        
-        if name and email and message:
-            # Submit to Flask API
-            api_response, status_code = APIClient.submit_contact_form(
-                name=name,
-                email=email,
-                subject=subject,
-                message=message
-            )
-            
-            if status_code == 201:
-                messages.success(request, 'Your message has been sent successfully! We\'ll get back to you soon.')
-                return JsonResponse({
-                    'status': 'success',
-                    'message': 'Your message has been sent successfully! We\'ll get back to you soon.',
-                    'redirect_url': '/'
-                })
-            else:
-                return JsonResponse({
-                    'status': 'error',
-                    'message': api_response.get('message', 'An error occurred. Please try again.')
-                }, status=400)
-        else:
-            return JsonResponse({
-                'status': 'error',
-                'message': 'Please fill in all required fields.'
-            }, status=400)
-        
-    return render(request, 'core/help_center.html')
-
-@csrf_exempt
-def contact_api(request):
-    if request.method == 'POST':
         try:
             data = json.loads(request.body)
             name = data.get('name')
             email = data.get('email')
             subject = data.get('subject', 'No Subject')
             message = data.get('message')
-
-            if not all([name, email, message]):
+            
+            if name and email and message:
+                # Submit to Flask API only
+                api_response, status_code = APIClient.submit_contact_form(
+                    name=name,
+                    email=email,
+                    subject=subject,
+                    message=message
+                )
+                
+                if status_code == 201:
+                    messages.success(request, 'Your message has been sent successfully! We\'ll get back to you soon.')
+                    return JsonResponse({
+                        'status': 'success',
+                        'message': 'Your message has been sent successfully! We\'ll get back to you soon.',
+                        'redirect_url': '/'
+                    })
+                else:
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': api_response.get('message', 'An error occurred. Please try again.')
+                    }, status=400)
+            else:
                 return JsonResponse({
                     'status': 'error',
-                    'message': 'Name, email and message are required'
+                    'message': 'Please fill in all required fields.'
                 }, status=400)
-
-            # Create contact message in Django database
-            ContactMessage.objects.create(
-                name=name,
-                email=email,
-                subject=subject,
-                message=message
-            )
-
-            return JsonResponse({
-                'status': 'success',
-                'message': 'Contact message saved successfully'
-            })
-
         except json.JSONDecodeError:
             return JsonResponse({
                 'status': 'error',
                 'message': 'Invalid JSON data'
             }, status=400)
         except Exception as e:
+            print(f"Error in help_center view: {str(e)}")  # Debug print
             return JsonResponse({
                 'status': 'error',
-                'message': str(e)
+                'message': 'An unexpected error occurred'
             }, status=500)
-
-    return JsonResponse({
-        'status': 'error',
-        'message': 'Method not allowed'
-    }, status=405)
+            
+    return render(request, 'core/help_center.html')
 
 def suggestion_form(request):
     if request.method == 'POST':
@@ -412,10 +380,18 @@ def suggestion_form(request):
                 }
             )
             if response.status_code == 201:
-                messages.success(request, 'Thank you for your suggestion!')
+                return JsonResponse({
+                    'status': 'success',
+                    'message': 'Thank you for your suggestion!'
+                })
             else:
-                messages.error(request, 'Something went wrong. Please try again.')
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Something went wrong. Please try again.'
+                }, status=400)
         except requests.RequestException:
-            messages.error(request, 'Could not connect to the server. Please try again later.')
-        return redirect('suggestion_form')
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Could not connect to the server. Please try again later.'
+            }, status=503)
     return render(request, 'core/suggestion_form.html')
