@@ -429,3 +429,49 @@ body {
         font-size: 0.8rem;
     }
 }
+
+/* Custom Input and Textarea Styles */
+.custom-input, .custom-textarea {
+    width: 100%;
+    padding: 1rem;
+    background: var(--glass-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    color: var(--text-color);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.custom-input:focus, .custom-textarea:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    background: var(--glass-bg);
+    box-shadow: 
+        0 0 5px rgba(139, 92, 246, 0.3),
+        0 0 20px rgba(139, 92, 246, 0.15);
+}
+
+.custom-input::placeholder, .custom-textarea::placeholder {
+    color: var(--text-color);
+    opacity: 0.5;
+}
+
+/* Scrollbar styling for the textarea */
+.custom-textarea::-webkit-scrollbar {
+    width: 8px;
+}
+
+.custom-textarea::-webkit-scrollbar-track {
+    background: var(--glass-bg);
+    border-radius: 4px;
+}
+
+.custom-textarea::-webkit-scrollbar-thumb {
+    background: var(--accent-color);
+    border-radius: 4px;
+}
+
+.custom-textarea::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(45deg, var(--gradient-start), var(--gradient-end));
+}

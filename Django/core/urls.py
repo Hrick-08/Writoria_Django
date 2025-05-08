@@ -23,6 +23,7 @@ urlpatterns = [
     path('help/', views.help_center, name='help_center'),
     path('logout/', auth_views.LogoutView.as_view(next_page='home'), name='logout'),
     path('api/contact/', views.contact_api, name='contact_api'),
+    path('suggestion/', views.suggestion_form, name='suggestion_form'),
 ]
 
 if settings.DEBUG:

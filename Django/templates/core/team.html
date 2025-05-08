@@ -15,7 +15,13 @@
     <section class="team-grid">
         <div class="team-member">
             <div class="member-image">
-                <img src="{% static divyam_image %}" alt="Divyam" class="member-photo">
+                {% if divyam_image %}
+                    <img src="{% static divyam_image %}" alt="Divyam" class="member-photo">
+                {% else %}
+                    <div class="image-placeholder">
+                        <i class="fas fa-user"></i>
+                    </div>
+                {% endif %}
             </div>
             <div class="member-info">
                 <h2>Divyam</h2>
@@ -30,7 +36,13 @@
 
         <div class="team-member">
             <div class="member-image">
-                <img src="{% static abhinav_image %}" alt="Abhinav" class="member-photo">
+                {% if abhinav_image %}
+                    <img src="{% static abhinav_image %}" alt="Abhinav" class="member-photo">
+                {% else %}
+                    <div class="image-placeholder">
+                        <i class="fas fa-user"></i>
+                    </div>
+                {% endif %}
             </div>
             <div class="member-info">
                 <h2>Abhinav</h2>
@@ -45,7 +57,13 @@
 
         <div class="team-member">
             <div class="member-image">
-                <img src="{% static hrick_image %}" alt="Hrick" class="member-photo">
+                {% if hrick_image %}
+                    <img src="{% static hrick_image %}" alt="Hrick" class="member-photo">
+                {% else %}
+                    <div class="image-placeholder">
+                        <i class="fas fa-user"></i>
+                    </div>
+                {% endif %}
             </div>
             <div class="member-info">
                 <h2>Hrick</h2>
@@ -60,7 +78,13 @@
 
         <div class="team-member">
             <div class="member-image">
-                <img src="{% static harsh_image %}" alt="Harsh" class="member-photo">
+                {% if harsh_image %}
+                    <img src="{% static harsh_image %}" alt="Harsh" class="member-photo">
+                {% else %}
+                    <div class="image-placeholder">
+                        <i class="fas fa-user"></i>
+                    </div>
+                {% endif %}
             </div>
             <div class="member-info">
                 <h2>Harsh</h2>

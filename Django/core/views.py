@@ -8,6 +8,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login, authenticate
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
+import requests
 from .models import BlogPost, UserProfile, Bookmark, BlogImage, Vote, Comment, ContactMessage
 from django.contrib.auth.models import User
 from .forms import BlogPostForm, UserProfileForm, CustomUserCreationForm, CommentForm
@@ -22,14 +23,14 @@ def about(request):
     return render(request, 'core/about.html')
 
 def team(request):
-    # Define team member images - these should be in your static/img folder
-    context = {
-        'divyam_image': 'img/team/divyam.jpg',
-        'abhinav_image': 'img/team/abhinav.jpg',
-        'hrick_image': 'img/team/hrick.jpg',
-        'harsh_image': 'img/team/harsh.jpg'
+    # Using existing numbered images from static/img directory
+    team_images = {
+        'divyam_image': 'img/1.jpg',
+        'abhinav_image': 'img/2.jpg',
+        'hrick_image': 'img/3.jpg',
+        'harsh_image': 'img/4.jpg'
     }
-    return render(request, 'core/team.html', context)
+    return render(request, 'core/team.html', team_images)
 
 def auth_view(request):
     login_form = AuthenticationForm()
@@ -397,3 +398,24 @@ def contact_api(request):
         'status': 'error',
         'message': 'Method not allowed'
     }, status=405)
+
+def suggestion_form(request):
+    if request.method == 'POST':
+        try:
+            response = requests.post(
+                'http://localhost:5000/api/contact',
+                json={
+                    'name': request.POST.get('name'),
+                    'email': request.POST.get('email'),
+                    'subject': request.POST.get('subject', 'Site Suggestion'),
+                    'message': request.POST.get('message')
+                }
+            )
+            if response.status_code == 201:
+                messages.success(request, 'Thank you for your suggestion!')
+            else:
+                messages.error(request, 'Something went wrong. Please try again.')
+        except requests.RequestException:
+            messages.error(request, 'Could not connect to the server. Please try again later.')
+        return redirect('suggestion_form')
+    return render(request, 'core/suggestion_form.html')

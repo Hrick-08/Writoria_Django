@@ -20,63 +20,39 @@
         background: var(--glass-bg);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid var(--border-color);
         border-radius: 1.5rem;
         padding: 2rem;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     }
 
     .contact-info {
-        background: rgba(13, 18, 30, 0.7);
-        border: 1px solid rgba(99, 102, 241, 0.3);
+        background: var(--glass-bg);
+        border: 1px solid var(--border-color);
         border-radius: 1rem;
         color: var(--text-color);
+        margin-bottom: 2rem;
     }
 
-    .form-control {
-        background: rgba(13, 18, 30, 0.7);
-        border: 1px solid rgba(99, 102, 241, 0.3);
-        border-radius: 1rem;
+    .contact-info h3 {
         color: var(--text-color);
-        padding: 0.75rem 1rem;
-        transition: all 0.3s ease;
+        font-weight: 600;
     }
 
-    .form-control:focus {
-        background: rgba(13, 18, 30, 0.8);
-        border-color: rgba(99, 102, 241, 0.6);
-        box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
-        outline: none;
+    .contact-info p {
+        color: var(--text-color);
+        opacity: 0.9;
+    }
+
+    .contact-info .text-muted {
+        color: var(--text-color) !important;
+        opacity: 0.6;
     }
 
     .form-label {
         color: var(--text-color);
         font-weight: 500;
         margin-bottom: 0.5rem;
-    }
-
-    .btn-primary {
-        background: linear-gradient(45deg, var(--gradient-start), var(--gradient-end));
-        border: none;
-        padding: 0.75rem 2rem;
-        border-radius: 2rem;
-        color: white;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
-    }
-
-    .btn-primary:hover {
-        background: linear-gradient(45deg, var(--gradient-end), var(--gradient-end));
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(99, 102, 241, 0.3);
-    }
-
-    h2, h3 {
-        color: var(--text-color);
-    }
-
-    .text-muted {
-        color: rgba(226, 232, 240, 0.6) !important;
     }
 </style>
 {% endblock %}
@@ -97,7 +73,7 @@
         <!-- Contact Form Section -->
         <div class="col-md-8">
             <div class="contact-card">
-                <h2 class="mb-4 text-center">Send Us a Message</h2>
+                <h2 class="mb-4 text-center" style="color: var(--text-color);">Send Us a Message</h2>
                 
                 <!-- Contact Information -->
                 <div class="mb-4 p-4 contact-info">
@@ -110,19 +86,20 @@
                     {% csrf_token %}
                     <div class="mb-3">
                         <label for="name" class="form-label">Name</label>
-                        <input type="text" class="form-control" id="name" name="name" required>
+                        <input type="text" class="custom-input" id="name" name="name" required placeholder="Enter your name">
                     </div>
                     <div class="mb-3">
                         <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email" name="email" required>
+                        <input type="email" class="custom-input" id="email" name="email" required placeholder="Enter your email">
                     </div>
                     <div class="mb-3">
                         <label for="subject" class="form-label">Subject (Optional)</label>
-                        <input type="text" class="form-control" id="subject" name="subject">
+                        <input type="text" class="custom-input" id="subject" name="subject" placeholder="What's this about?">
                     </div>
                     <div class="mb-3">
                         <label for="message" class="form-label">Message</label>
-                        <textarea class="form-control" id="message" name="message" rows="4" required></textarea>
+                        <textarea class="custom-textarea" id="message" name="message" rows="4" required 
+                                placeholder="Type your message here..."></textarea>
                     </div>
                     <div class="text-center">
                         <button type="submit" class="btn btn-primary">Send Message</button>
