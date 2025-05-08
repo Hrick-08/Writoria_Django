@@ -38,37 +38,46 @@ Writoria is a full-featured blogging platform built with Django that enables wri
 - CSRF protection
 - Secure password handling
 
+### API Integration
+- Dual server architecture with Django and Flask
+- Flask API handles contact form submissions
+- Bidirectional sync between Django and Flask
+- CORS enabled for secure cross-origin requests
+
 ## 🔧 Technology Stack
 
 - **Backend**: Django 5.2
+- **API Server**: Flask with SQLAlchemy
 - **Frontend**: HTML5, CSS3, JavaScript
 - **Database**: SQLite (development)
 - **UI Framework**: Bootstrap 5.3
 - **Icons**: Font Awesome 6.0
 - **Image Processing**: Pillow
 - **Markdown Support**: marked.js
+- **API Integration**: requests, flask-cors
 
 ## 📁 Project Structure
 
 ```
 writoria/
-├── core/                   # Main application
-│   ├── models.py          # Database models
-│   ├── views.py           # View controllers
-│   ├── urls.py            # URL routing
-│   ├── forms.py           # Form definitions
-│   └── admin.py           # Admin interface
-├── chat/                  # Chat functionality
-├── static/                # Static files
-│   ├── css/              # Stylesheets
-│   ├── js/               # JavaScript files
-│   └── img/              # Images
-├── templates/             # HTML templates
-│   ├── base.html         # Base template
-│   └── core/             # Core app templates
-├── media/                # User-uploaded files
-├── manage.py             # Django management
-└── requirements.txt      # Dependencies
+├── Django/                 # Django application
+│   ├── core/              # Main application
+│   │   ├── models.py      # Database models
+│   │   ├── views.py       # View controllers
+│   │   ├── urls.py        # URL routing
+│   │   ├── forms.py       # Form definitions
+│   │   ├── admin.py       # Admin interface
+│   │   └── services/      # API client services
+│   ├── chat/              # Chat functionality
+│   ├── static/            # Static files
+│   ├── templates/         # HTML templates
+│   └── media/             # User-uploaded files
+├── Flask/                 # Flask API server
+│   └── flask_app/         # Flask application
+│       ├── app.py         # API endpoints
+│       └── database.db    # SQLite database
+├── manage.py              # Django management
+└── requirements.txt       # Dependencies
 ```
 
 ## 🔑 Core Models
@@ -79,6 +88,21 @@ writoria/
 - **Vote**: Handles the "life" voting system
 - **Bookmark**: User's saved posts
 - **BlogImage**: Multiple images per post with captions
+
+## 🔌 API Endpoints
+
+### Flask API (localhost:5000)
+- `POST /api/contact`
+  - Handles contact form submissions
+  - Stores messages in Flask database
+  - Forwards data to Django API
+  - Returns success/error status
+
+### Django API (localhost:8000) 
+- `POST /api/contact/`
+  - Receives synced contact data from Flask
+  - Stores messages in Django database
+  - Handles error cases and validation
 
 ## 🚀 Getting Started
 
