@@ -232,7 +232,7 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
     margin: 2rem auto;
     border-radius: 1.5rem;
-    max-width: 800px; /* Reduced max-width for better readability */
+    max-width: 1200px; /* Also increased section max-width to match */
 }
 
 .testimonials-grid {
@@ -247,12 +247,13 @@
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 1rem;
-    padding: 1.25rem; /* Reduced padding */
+    padding: 2rem; /* Increased padding */
     margin: 0.5rem 0;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    justify-content: space-between;
+    min-height: 280px; /* Added minimum height */
 }
 
 .testimonial-card:hover {
@@ -279,14 +280,18 @@
 
 .testimonial-content {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem; /* Increased gap */
 }
 
 .testimonial-text {
-    font-size: 0.9rem; /* Slightly smaller font */
-    line-height: 1.5;
+    font-size: 1.1rem; /* Increased font size */
+    line-height: 1.7; /* Increased line height */
     color: var(--text-color);
-    margin-bottom: 0.75rem;
+    margin: 1rem 0; /* Added margin */
     font-style: italic;
+    flex-grow: 1;
 }
 
 .testimonial-author h4 {
@@ -306,7 +311,8 @@
 .testimonials-slider-container {
     position: relative;
     margin: 0 auto;
-    padding: 0 50px; /* Reduced padding to bring arrows closer */
+    padding: 0 50px;
+    max-width: 1200px; /* Increased from 900px to 1200px */
 }
 
 .testimonials-slider {
