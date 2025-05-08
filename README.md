@@ -151,4 +151,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 - Built with Django and Bootstrap
 - Icons by Font Awesome
-- Community contributors and feedback
+- Community contributors and feedback 
